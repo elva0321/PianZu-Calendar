@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平安住行事曆 - 管理後台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen p-6">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">📋 平安住行事曆 - 管理後台</h1>
+                <p class="text-gray-600">新增、編輯或刪除工作行程</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="bg-white rounded-lg shadow-md mb-6">
+                <div class="flex border-b">
+                    <button onclick="switchTab('add')" id="tab-add" class="px-6 py-3 font-semibold border-b-2 border-blue-500 text-blue-600">➕ 新增行程</button>
+                    <button onclick="switchTab('manage')" id="tab-manage" class="px-6 py-3 font-semibold text-gray-600 hover:text-blue-600">📝 管理行程</button>
+                    <button onclick="switchTab('export')" id="tab-export" class="px-6 py-3 font-semibold text-gray-600 hover:text-blue-600">💾 匯出代碼</button>
+                </div>
+
+                <!-- Add Task Tab -->
+                <div id="content-add" class="p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">新增工作行程</h2>
+                    <form id="addTaskForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">📅 日期</label>
+                                <input type="date" id="taskDate" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">📆 星期</label>
+                                <select id="taskWeekday" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                                    <option value="週一">週一</option>
+                                    <option value="週二">週二</option>
+                                    <option value="週三">週三</option>
+                                    <option value="週四">週四</option>
+                                    <option value="週五">週五</option>
+                                    <option value="週六">週六</option>
+                                    <option value="週日">週日</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">🏷️ 類型</label>
+                                <select id="taskType" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                                    <option value="project">工程</option>
+                                    <option value="meeting">會議</option>
+                                    <option value="deadline">截止</option>
+                                    <option value="check">檢查</option>
+                                    <option value="equipment">機具</option>
+                                    <option value="note">備註</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📝 工作標題</label>
+                            <input type="text" id="taskTitle" required placeholder="例：哈爾濱：打管路" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">📍 工作地點</label>
+                                <input type="text" id="taskLocation" required placeholder="例：哈爾濱" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">🔧 部門</label>
+                                <select id="taskDepartment" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                                    <option value="水電">水電</option>
+                                    <option value="拆除">拆除</option>
+                                    <option value="油漆防水">油漆防水</option>
+                                    <option value="工程">工程</option>
+                                    <option value="行政">行政</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">👷 負責人員（用逗號分隔）</label>
+                                <input type="text" id="taskStaff" placeholder="例：小朱,小熊" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">📊 進度（選填）</label>
+                                <input type="text" id="taskProgress" placeholder="例：70%" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📌 備註（選填）</label>
+                            <textarea id="taskNote" rows="2" placeholder="例：需照片存證" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                            ➕ 新增行程
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Manage Tasks Tab -->
+                <div id="content-manage" class="p-6 hidden">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">管理現有行程</h2>
+                    <div id="taskList" class="space-y-4"></div>
+                </div>
+
+                <!-- Export Tab -->
+                <div id="content-export" class="p-6 hidden">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">匯出完整代碼</h2>
+                    <p class="text-gray-600 mb-4">複製下方代碼，貼到 GitHub 的 index.html 中</p>
+                    <div class="bg-gray-800 text-white p-4 rounded-lg mb-4 relative">
+                        <button onclick="copyCode()" class="absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm">
+                            📋 複製
+                        </button>
+                        <pre id="exportCode" class="text-xs overflow-x-auto pt-8"></pre>
+                    </div>
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                        <p class="text-sm text-gray-700">
+                            <strong>💡 使用說明：</strong><br>
+                            1. 點擊「📋 複製」按鈕<br>
+                            2. 前往 GitHub 編輯 index.html<br>
+                            3. 全選刪除舊代碼<br>
+                            4. 貼上新代碼<br>
+                            5. Commit changes<br>
+                            6. 等 1-2 分鐘，Netlify 自動更新！
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let allTasks = [
+            { date: '11/27', fullDate: '2024-11-27', weekday: '週三', tasks: [
+                { title: '艾福特專案報告', type: 'meeting', location: '公司', staff: [], department: '行政' }
+            ]},
+            { date: '11/28', fullDate: '2024-11-28', weekday: '週四', tasks: [
+                { title: 'DC 4樓報價', type: 'deadline', location: 'DC 4樓', staff: [], department: '行政', note: '截止日期' },
+                { title: '范老師配管報價', type: 'deadline', location: '范老師處', staff: [], department: '行政', note: '截止日期' },
+                { title: '大社堂內巷（開始）', type: 'project', location: '大社堂內巷', staff: [], department: '工程', company: '強力鋼鐵' }
+            ]},
+            { date: '11/29', fullDate: '2024-11-29', weekday: '週五', tasks: [
+                { title: '大社堂內巷（進行中）', type: 'project', location: '大社堂內巷', staff: [], department: '工程', company: '強力鋼鐵' }
+            ]},
+            { date: '11/30', fullDate: '2024-11-30', weekday: '週六', tasks: [
+                { title: '大社堂內巷（完成）', type: 'project', location: '大社堂內巷', staff: [], department: '工程', company: '強力鋼鐵' },
+                { title: 'Eason：需請一名粗工確保地面安全', type: 'note', location: '大社堂內巷', staff: ['Eason'], department: '工程', note: '需請粗工' }
+            ]},
+            { date: '12/1', fullDate: '2024-12-01', weekday: '週日', tasks: [
+                { title: '仁義街開工', type: 'project', location: '仁義街', staff: [], department: '工程' }
+            ]},
+            { date: '12/2', fullDate: '2024-12-02', weekday: '週一', tasks: [
+                { title: '哈爾濱：打管路', type: 'project', location: '哈爾濱', staff: [], department: '水電', progress: '70%' },
+                { title: '大寮：甲苯洗地', type: 'project', location: '大寮', staff: ['大雄', '阿程'], department: '油漆防水', progress: '0%' },
+                { title: '大寮：油性底漆打底', type: 'project', location: '大寮', staff: ['大雄', '阿程'], department: '油漆防水', progress: '0%', note: '待12/03檢查乾燥' },
+                { title: '仁義街：晚上怪手進場', type: 'equipment', location: '仁義街', staff: [], department: '拆除', progress: '0%' },
+                { title: '光舜：追加品項確認', type: 'meeting', location: '光舜', staff: [], department: '水電', note: '衛浴支線追加、排水補強兩處' },
+                { title: '善化：追加品項確認', type: 'meeting', location: '善化', staff: [], department: '水電', note: '冷熱水末端補點、排水端點加固' }
+            ]},
+            { date: '12/3', fullDate: '2024-12-03', weekday: '週二', tasks: [
+                { title: '哈爾濱：配管', type: 'project', location: '哈爾濱', staff: [], department: '水電', progress: '70%' },
+                { title: '大寮：檢查底漆乾燥', type: 'check', location: '大寮', staff: ['阿程', '偉偉'], department: '油漆防水' },
+                { title: '仁義街：打除（第一日）', type: 'project', location: '仁義街', staff: [], department: '拆除', progress: '30%' },
+                { title: '仁義街：配管改彎頭重配', type: 'project', location: '仁義街', staff: [], department: '水電', note: '需照片存證' }
+            ]},
+            { date: '12/4', fullDate: '2024-12-04', weekday: '週三', tasks: [
+                { title: '哈爾濱：配管續作', type: 'project', location: '哈爾濱', staff: [], department: '水電', progress: '70%' },
+                { title: '仁義街：打除（第二日）', type: 'project', location: '仁義街', staff: [], department: '拆除', progress: '70%' }
+            ]},
+            { date: '12/5', fullDate: '2024-12-05', weekday: '週四', tasks: [
+                { title: '哈爾濱：試水', type: 'check', location: '哈爾濱', staff: [], department: '水電', progress: '70%', note: '壓力正常，無滲漏' },
+                { title: '南台路配線完成', type: 'deadline', location: '南台路', staff: ['小朱', '小熊'], department: '水電', note: '完成期限' },
+                { title: '仁義街客戶色卡確認', type: 'deadline', location: '仁義街', staff: [], department: '行政', note: '完成期限' },
+                { title: '仁義街：水塔移位完成', type: 'project', location: '仁義街', staff: [], department: '拆除', progress: '70%' }
+            ]},
+            { date: '12/6', fullDate: '2024-12-06', weekday: '週五', tasks: [
+                { title: '哈爾濱：土水封槽', type: 'project', location: '哈爾濱', staff: [], department: '水電', progress: '70%' }
+            ]},
+            { date: '12/7', fullDate: '2024-12-07', weekday: '週六', tasks: [] },
+            { date: '12/8', fullDate: '2024-12-08', weekday: '週日', tasks: [
+                { title: '仁義街：下料清運', type: 'equipment', location: '仁義街', staff: [], department: '拆除', note: '預計2-3車' }
+            ]}
+        ];
+
+        // Switch tabs
+        function switchTab(tab) {
+            ['add', 'manage', 'export'].forEach(t => {
+                document.getElementById(`tab-${t}`).className = 'px-6 py-3 font-semibold text-gray-600 hover:text-blue-600';
+                document.getElementById(`content-${t}`).classList.add('hidden');
+            });
+            document.getElementById(`tab-${tab}`).className = 'px-6 py-3 font-semibold border-b-2 border-blue-500 text-blue-600';
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            
+            if (tab === 'manage') renderTaskList();
+            if (tab === 'export') generateExportCode();
+        }
+
+        // Add task
+        document.getElementById('addTaskForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const dateInput = document.getElementById('taskDate').value;
+            const date = new Date(dateInput);
+            const shortDate = `${date.getMonth() + 1}/${date.getDate()}`;
+            
+            const newTask = {
+                title: document.getElementById('taskTitle').value,
+                type: document.getElementById('taskType').value,
+                location: document.getElementById('taskLocation').value,
+                staff: document.getElementById('taskStaff').value.split(',').map(s => s.trim()).filter(s => s),
+                department: document.getElementById('taskDepartment').value,
+                progress: document.getElementById('taskProgress').value || undefined,
+                note: document.getElementById('taskNote').value || undefined
+            };
+
+            // Find or create day
+            let dayIndex = allTasks.findIndex(d => d.fullDate === dateInput);
+            if (dayIndex === -1) {
+                allTasks.push({
+                    date: shortDate,
+                    fullDate: dateInput,
+                    weekday: document.getElementById('taskWeekday').value,
+                    tasks: [newTask]
+                });
+                allTasks.sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
+            } else {
+                allTasks[dayIndex].tasks.push(newTask);
+            }
+
+            alert('✅ 行程已新增！請到「匯出代碼」標籤複製更新後的代碼');
+            document.getElementById('addTaskForm').reset();
+        });
+
+        // Render task list
+        function renderTaskList() {
+            const container = document.getElementById('taskList');
+            container.innerHTML = '';
+
+            allTasks.forEach((day, dayIdx) => {
+                day.tasks.forEach((task, taskIdx) => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white border-2 border-gray-200 rounded-lg p-4';
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="text-sm text-gray-500 mb-1">${day.date} ${day.weekday}</div>
+                                <h3 class="font-bold text-gray-800 mb-2">${task.title}</h3>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    <div>📍 ${task.location} | 🔧 ${task.department}</div>
+                                    ${task.staff.length > 0 ? `<div>👷 ${task.staff.join('、')}</div>` : ''}
+                                    ${task.progress ? `<div>📊 進度：${task.progress}</div>` : ''}
+                                    ${task.note ? `<div>📌 ${task.note}</div>` : ''}
+                                </div>
+                            </div>
+                            <button onclick="deleteTask(${dayIdx}, ${taskIdx})" class="ml-4 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                                🗑️ 刪除
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        // Delete task
+        function deleteTask(dayIdx, taskIdx) {
+            if (confirm('確定要刪除這個行程嗎？')) {
+                allTasks[dayIdx].tasks.splice(taskIdx, 1);
+                if (allTasks[dayIdx].tasks.length === 0) {
+                    allTasks.splice(dayIdx, 1);
+                }
+                renderTaskList();
+                alert('✅ 行程已刪除！請到「匯出代碼」標籤複製更新後的代碼');
+            }
+        }
+
+        // Generate export code
+        function generateExportCode() {
+            const tasksJSON = JSON.stringify(allTasks, null, 12);
+            const fullCode = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平安住工作行事曆</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-2">平安住工作行事曆</h1>
+                        <p class="text-gray-600" id="date-range">2024年12月2日起 即將到來的工作排程</p>
+                    </div>
+                    <button onclick="togglePastEvents()" id="past-btn" class="flex items-center gap-2 px-4 py-2 rounded-lg border-2 bg-white text-gray-700 border-gray-300 hover:border-blue-300 transition-all">
+                        <span>📅</span>
+                        <span id="past-text">過去行程</span>
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-green-500">
+                    <h3 class="font-semibold text-gray-800 mb-2">💧 水電部門</h3>
+                    <p class="text-sm text-gray-600 mb-1">哈爾濱 / 仁義街 / 南台路</p>
+                    <div class="text-2xl font-bold text-green-600">70%</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-orange-500">
+                    <h3 class="font-semibold text-gray-800 mb-2">🔧 油漆防水</h3>
+                    <p class="text-sm text-gray-600 mb-1">大寮</p>
+                    <div class="text-2xl font-bold text-orange-600">0%</div>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-red-500">
+                    <h3 class="font-semibold text-gray-800 mb-2">🗑️ 拆除工程</h3>
+                    <p class="text-sm text-gray-600 mb-1">仁義街</p>
+                    <div class="text-2xl font-bold text-red-600">70%</div>
+                </div>
+            </div>
+            <div id="calendar-container"></div>
+        </div>
+    </div>
+    <script>
+        let showPast = false;
+        const allTasks = ${tasksJSON};
+        function isPastDate(dateStr) {
+            const taskDate = new Date(dateStr);
+            const today = new Date('2024-12-02');
+            today.setHours(0, 0, 0, 0);
+            return taskDate < today;
+        }
+        function togglePastEvents() {
+            showPast = !showPast;
+            const btn = document.getElementById('past-btn');
+            const text = document.getElementById('past-text');
+            const dateRange = document.getElementById('date-range');
+            if (showPast) {
+                btn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+                btn.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+                text.textContent = '隱藏過去行程';
+                dateRange.textContent = '完整工作排程';
+            } else {
+                btn.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                btn.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+                text.textContent = '過去行程';
+                dateRange.textContent = '2024年12月2日起 即將到來的工作排程';
+            }
+            renderCalendar();
+        }
+        function renderCalendar() {
+            const filtered = allTasks.filter(day => showPast || !isPastDate(day.fullDate)).filter(day => day.tasks.length > 0);
+            let html = '<div class="space-y-6">';
+            for (let i = 0; i < filtered.length; i += 3) {
+                html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-6">';
+                const row = filtered.slice(i, i + 3);
+                row.forEach(day => {
+                    const isPast = isPastDate(day.fullDate);
+                    html += \`<div class="bg-white rounded-lg shadow-sm border \${isPast ? 'border-gray-300 opacity-75' : 'border-gray-200'} overflow-hidden">
+                        <div class="\${isPast ? 'bg-gray-500' : 'bg-gray-800'} text-white p-4">
+                            <div class="flex items-center justify-between">
+                                <div><div class="text-3xl font-bold">\${day.date}</div><div class="text-sm text-gray-300">\${day.weekday}</div></div>
+                                \${isPast ? '<div class="bg-white bg-opacity-20 px-2 py-1 rounded text-xs">已完成</div>' : ''}
+                            </div>
+                        </div>
+                        <div class="p-4 space-y-3">\`;
+                    day.tasks.forEach(task => {
+                        const typeColors = {meeting: 'bg-blue-50 border-blue-300', check: 'bg-purple-50 border-purple-300', project: 'bg-green-50 border-green-300', equipment: 'bg-orange-50 border-orange-300', deadline: 'bg-red-50 border-red-300', note: 'bg-yellow-50 border-yellow-300'};
+                        const typeLabels = {meeting: '會議', check: '檢查', project: '工程', equipment: '機具', deadline: '截止', note: '備註'};
+                        html += \`<div class="p-3 rounded-lg border-2 \${typeColors[task.type]}">
+                            <div class="flex items-start justify-between mb-2">
+                                <h3 class="font-semibold text-gray-800 flex-1 text-sm">\${task.title}</h3>
+                                <span class="text-xs font-medium px-2 py-1 rounded bg-white border border-gray-300 ml-2">\${typeLabels[task.type]}</span>
+                            </div>
+                            <div class="space-y-1 text-xs text-gray-600">
+                                <div>📍 \${task.location}</div>
+                                \${task.department ? \`<div>🔧 \${task.department}</div>\` : ''}
+                                \${task.staff.length > 0 ? \`<div>👷 \${task.staff.join('、')}</div>\` : ''}
+                                \${task.progress ? \`<div class="mt-2"><div class="flex justify-between items-center mb-1"><span class="text-xs font-medium">進度</span><span class="text-xs font-bold">\${task.progress}</span></div><div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full" style="width: \${task.progress}"></div></div></div>\` : ''}
+                                \${task.note ? \`<div class="mt-2 p-2 bg-white rounded text-xs text-gray-600 border border-gray-200">💡 \${task.note}</div>\` : ''}
+                            </div>
+                        </div>\`;
+                    });
+                    html += '</div></div>';
+                });
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('calendar-container').innerHTML = html;
+        }
+        renderCalendar();
+    </script>
+</body>
+</html>`;
+            document.getElementById('exportCode').textContent = fullCode;
+        }
+
+        // Copy code
+        function copyCode() {
+            const code = document.getElementById('exportCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('✅ 代碼已複製！現在可以貼到 GitHub 的 index.html 了');
+            });
+        }
+
+        // Initialize
+        generateExportCode();
+    </script>
+</body>
+</html>
