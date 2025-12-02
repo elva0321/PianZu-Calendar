@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平安住工作行事曆</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-2">平安住工作行事曆</h1>
+                        <p class="text-gray-600" id="date-range">2024年12月2日起 即將到來的工作排程</p>
+                    </div>
+                    <button onclick="togglePastEvents()" id="past-btn" class="flex items-center gap-2 px-4 py-2 rounded-lg border-2 bg-white text-gray-700 border-gray-300 hover:border-blue-300 transition-all">
+                        <span>📅</span>
+                        <span id="past-text">過去行程 (5)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Progress Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-green-500">
+                    <h3 class="font-semibold text-gray-800 mb-2">💧 水電部門</h3>
+                    <p class="text-sm text-gray-600 mb-1">哈爾濱 / 仁義街 / 南台路</p>
+                    <div class="text-2xl font-bold text-green-600">70%</div>
+                    <p class="text-xs text-gray-500 mt-1">無重大延誤，剩修補＋末端定位</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-orange-500">
+                    <h3 class="font-semibold text-gray-800 mb-2">🔧 油漆防水</h3>
+                    <p class="text-sm text-gray-600 mb-1">大寮</p>
+                    <div class="text-2xl font-bold text-orange-600">0%</div>
+                    <p class="text-xs text-gray-500 mt-1">前置工法，基面偏弱需補強</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-sm p-4 border-l-4 border-red-500">
+                    <h3 class="font-semibold text-gray-800 mb-2">🗑️ 拆除工程</h3>
+                    <p class="text-sm text-gray-600 mb-1">仁義街</p>
+                    <div class="text-2xl font-bold text-red-600">70%</div>
+                    <p class="text-xs text-gray-500 mt-1">下週轉入基礎整平與水電預定位</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">🔍 篩選條件</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Staff -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">👷 人員</label>
+                        <div class="flex flex-wrap gap-2" id="staff-filter"></div>
+                    </div>
+                    <!-- Department -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">🔧 部門</label>
+                        <div class="flex flex-wrap gap-2" id="dept-filter"></div>
+                    </div>
+                    <!-- Location -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">📍 工作地點</label>
+                        <select id="location-filter" onchange="filterTasks()" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Important Notes -->
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 mb-6">
+                <h3 class="font-semibold text-gray-800 mb-2">📋 重要事項</h3>
+                <ul class="space-y-1 text-sm text-gray-700">
+                    <li>• <strong>光舜 & 善化追加報價：</strong>建議 12/09 前完成彙整給業主確認</li>
+                    <li>• <strong>仁義街改彎頭：</strong>需照片存證，避免後續干涉爭議</li>
+                    <li>• <strong>大寮基面：</strong>偏弱，後續需再補一道底漆或補強帶</li>
+                    <li>• <strong>下週機具：</strong>需調度一台攪拌機 + 電鎚供哈爾濱收尾</li>
+                </ul>
+            </div>
+
+            <!-- Calendar -->
+            <div id="calendar-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let showPast = false;
+        let selectedStaff = '全部';
+        let selectedDept = '全部';
+        let selectedLocation = '全部';
+
+        const allTasks = [
+            { date: '11/27', fullDate: '2024-11-27', weekday: '週三', tasks: [
+                { title: '艾福特專案報告', type: 'meeting', location: '公司', staff: [], department: '行政' }
+            ]},
+            { date: '11/28', fullDate: '2024-11-28', weekday: '週四', tasks: [
+                { title: 'DC 4樓報價', type: 'deadline', location: 'DC 4樓', staff: [], department: '行政', note: '截止日期' },
+                { title: '范老師配管報價', type: 'deadline', location: '范老師處', staff: [], department: '行政', note: '截止日期' },
+                { title: '大社堂內巷（開始）', type: 'project', location: '大社堂內巷', staff: [], department: '工程', company: '強力鋼鐵' }
+            ]},
+            { date: '11/29', fullDate: '2024-11-29', weekday: '週五', tasks: [
+                { title: '大社堂內巷（進行中）', type: 'project', location: '大社堂內巷', staff: [], department: '工程', company: '強力鋼鐵' }
+            ]},
+            { date: '11/30', fullDate: '2024-11-30', weekday: '週六', tasks: [
+                { title: '大社堂內巷（完成）', type: 'project', location: '大社堂內巷', staff: [], department: '工程', company: '強力鋼鐵' },
+                { title: 'Eason：需請一名粗工確保地面安全', type: 'note', location: '大社堂內巷', staff: ['Eason'], department: '工程', note: '需請粗工' }
+            ]},
+            { date: '12/1', fullDate: '2024-12-01', weekday: '週日', tasks: [
+                { title: '仁義街開工', type: 'project', location: '仁義街', staff: [], department: '工程' }
+            ]},
+            { date: '12/2', fullDate: '2024-12-02', weekday: '週一', tasks: [
+                { title: '哈爾濱：打管路', type: 'project', location: '哈爾濱', staff: [], department: '水電', progress: '70%' },
+                { title: '大寮：甲苯洗地', type: 'project', location: '大寮', staff: ['大雄', '阿程'], department: '油漆防水', progress: '0%' },
+                { title: '大寮：油性底漆打底', type: 'project', location: '大寮', staff: ['大雄', '阿程'], department: '油漆防水', progress: '0%', note: '待12/03檢查乾燥' },
+                { title: '仁義街：晚上怪手進場', type: 'equipment', location: '仁義街', staff: [], department: '拆除', progress: '0%' },
+                { title: '光舜：追加品項確認', type: 'meeting', location: '光舜', staff: [], department: '水電', note: '衛浴支線追加、排水補強兩處' },
+                { title: '善化：追加品項確認', type: 'meeting', location: '善化', staff: [], department: '水電', note: '冷熱水末端補點、排水端點加固' }
+            ]},
+            { date: '12/3', fullDate: '2024-12-03', weekday: '週二', tasks: [
+                { title: '哈爾濱：配管', type: 'project', location: '哈爾濱', staff: [], department: '水電', progress: '70%' },
+                { title: '大寮：檢查底漆乾燥', type: 'check', location: '大寮', staff: ['阿程', '偉偉'], department: '油漆防水' },
+                { title: '仁義街：打除（第一日）', type: 'project', location: '仁義街', staff: [], department: '拆除', progress: '30%' },
+                { title: '仁義街：配管改彎頭重配', type: 'project', location: '仁義街', staff: [], department: '水電', note: '需照片存證' }
+            ]},
+            { date: '12/4', fullDate: '2024-12-04', weekday: '週三', tasks: [
+                { title: '哈爾濱：配管續作', type: 'project', location: '哈爾濱', staff: [], department: '水電', progress: '70%' },
+                { title: '仁義街：打除（第二日）', type: 'project', location: '仁義街', staff: [], department: '拆除', progress: '70%' }
+            ]},
+            { date: '12/5', fullDate: '2024-12-05', weekday: '週四', tasks: [
+                { title: '哈爾濱：試水', type: 'check', location: '哈爾濱', staff: [], department: '水電', progress: '70%', note: '壓力正常，無滲漏' },
+                { title: '南台路配線完成', type: 'deadline', location: '南台路', staff: ['小朱', '小熊'], department: '水電', note: '完成期限' },
+                { title: '仁義街客戶色卡確認', type: 'deadline', location: '仁義街', staff: [], department: '行政', note: '完成期限' },
+                { title: '仁義街：水塔移位完成', type: 'project', location: '仁義街', staff: [], department: '拆除', progress: '70%' }
+            ]},
+            { date: '12/6', fullDate: '2024-12-06', weekday: '週五', tasks: [
+                { title: '哈爾濱：土水封槽', type: 'project', location: '哈爾濱', staff: [], department: '水電', progress: '70%' }
+            ]},
+            { date: '12/7', fullDate: '2024-12-07', weekday: '週六', tasks: [] },
+            { date: '12/8', fullDate: '2024-12-08', weekday: '週日', tasks: [
+                { title: '仁義街：下料清運', type: 'equipment', location: '仁義街', staff: [], department: '拆除', note: '預計2-3車' }
+            ]}
+        ];
+
+        const staffList = ['全部', '小朱', '小熊', 'Eason', '大雄', '阿程', '偉偉'];
+        const deptList = ['全部', '水電', '拆除', '油漆防水', '工程', '行政'];
+        const locationList = ['全部', '哈爾濱', '哈爾濱街、南台路', '南台路', '仁義街', '大社堂內巷', '大寮', '光舜', '善化', 'DC 4樓', '范老師處', '公司'];
+
+        const typeColors = {
+            meeting: 'bg-blue-50 border-blue-300',
+            check: 'bg-purple-50 border-purple-300',
+            project: 'bg-green-50 border-green-300',
+            equipment: 'bg-orange-50 border-orange-300',
+            deadline: 'bg-red-50 border-red-300',
+            note: 'bg-yellow-50 border-yellow-300'
+        };
+
+        const typeLabels = {
+            meeting: '會議', check: '檢查', project: '工程',
+            equipment: '機具', deadline: '截止', note: '備註'
+        };
+
+        function isPastDate(dateStr) {
+            const taskDate = new Date(dateStr);
+            const today = new Date('2024-12-02');
+            today.setHours(0, 0, 0, 0);
+            return taskDate < today;
+        }
+
+        function togglePastEvents() {
+            showPast = !showPast;
+            const btn = document.getElementById('past-btn');
+            const text = document.getElementById('past-text');
+            const dateRange = document.getElementById('date-range');
+            
+            if (showPast) {
+                btn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+                btn.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+                text.textContent = '隱藏過去行程';
+                dateRange.textContent = '2024年11月27日 - 2024年12月8日 完整工作排程';
+            } else {
+                btn.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                btn.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+                text.textContent = '過去行程 (5)';
+                dateRange.textContent = '2024年12月2日起 即將到來的工作排程';
+            }
+            
+            renderCalendar();
+        }
+
+        function initFilters() {
+            // Staff
+            const staffContainer = document.getElementById('staff-filter');
+            staffContainer.innerHTML = staffList.map(s => 
+                `<button onclick="selectStaff('${s}')" id="staff-${s}" class="px-4 py-2 rounded-lg border-2 transition-all ${s === '全部' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'}">${s}</button>`
+            ).join('');
+
+            // Department
+            const deptContainer = document.getElementById('dept-filter');
+            deptContainer.innerHTML = deptList.map(d => 
+                `<button onclick="selectDept('${d}')" id="dept-${d}" class="px-4 py-2 rounded-lg border-2 transition-all ${d === '全部' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-300 hover:border-blue-300'}">${d}</button>`
+            ).join('');
+
+            // Location
+            const locationSelect = document.getElementById('location-filter');
+            locationSelect.innerHTML = locationList.map(l => 
+                `<option value="${l}">${l}</option>`
+            ).join('');
+        }
+
+        function selectStaff(staff) {
+            selectedStaff = staff;
+            staffList.forEach(s => {
+                const btn = document.getElementById(`staff-${s}`);
+                if (s === staff) {
+                    btn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+                    btn.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+                } else {
+                    btn.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                    btn.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+                }
+            });
+            filterTasks();
+        }
+
+        function selectDept(dept) {
+            selectedDept = dept;
+            deptList.forEach(d => {
+                const btn = document.getElementById(`dept-${d}`);
+                if (d === dept) {
+                    btn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+                    btn.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+                } else {
+                    btn.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                    btn.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+                }
+            });
+            filterTasks();
+        }
+
+        function filterTasks() {
+            selectedLocation = document.getElementById('location-filter').value;
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const filtered = allTasks
+                .filter(day => showPast || !isPastDate(day.fullDate))
+                .map(day => ({
+                    ...day,
+                    isPast: isPastDate(day.fullDate),
+                    tasks: day.tasks.filter(task => {
+                        const staffMatch = selectedStaff === '全部' || task.staff.includes(selectedStaff) || (task.staff.length === 0 && selectedStaff === '全部');
+                        const locationMatch = selectedLocation === '全部' || task.location.includes(selectedLocation);
+                        const deptMatch = selectedDept === '全部' || task.department === selectedDept;
+                        return staffMatch && locationMatch && deptMatch;
+                    })
+                }))
+                .filter(day => day.tasks.length > 0);
+
+            let html = '<div class="space-y-6">';
+            
+            for (let i = 0; i < filtered.length; i += 3) {
+                html += '<div class="grid grid-cols-1 md:grid-cols-3 gap-6">';
+                const row = filtered.slice(i, i + 3);
+                
+                row.forEach(day => {
+                    const headerClass = day.isPast ? 'bg-gray-500' : 'bg-gray-800';
+                    const borderClass = day.isPast ? 'border-gray-300 opacity-75' : 'border-gray-200';
+                    
+                    html += `
+                        <div class="bg-white rounded-lg shadow-sm border ${borderClass} overflow-hidden">
+                            <div class="${headerClass} text-white p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-3xl font-bold">${day.date}</div>
+                                        <div class="text-sm text-gray-300">${day.weekday}</div>
+                                    </div>
+                                    ${day.isPast ? '<div class="bg-white bg-opacity-20 px-2 py-1 rounded text-xs">已完成</div>' : ''}
+                                </div>
+                            </div>
+                            <div class="p-4 space-y-3">
+                    `;
+                    
+                    if (day.tasks.length === 0) {
+                        html += '<div class="text-center py-6 text-gray-400"><p class="text-sm">無工作事項</p></div>';
+                    } else {
+                        day.tasks.forEach(task => {
+                            html += `
+                                <div class="p-3 rounded-lg border-2 ${typeColors[task.type]}">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <h3 class="font-semibold text-gray-800 flex-1 text-sm">${task.title}</h3>
+                                        <span class="text-xs font-medium px-2 py-1 rounded bg-white border border-gray-300 ml-2">${typeLabels[task.type]}</span>
+                                    </div>
+                                    <div class="space-y-1 text-xs text-gray-600">
+                                        <div>📍 ${task.location}</div>
+                                        ${task.department ? `<div>🔧 ${task.department}</div>` : ''}
+                                        ${task.staff.length > 0 ? `<div>👷 ${task.staff.join('、')}</div>` : ''}
+                                        ${task.progress ? `
+                                            <div class="mt-2">
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <span class="text-xs font-medium">進度</span>
+                                                    <span class="text-xs font-bold">${task.progress}</span>
+                                                </div>
+                                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                                    <div class="bg-blue-500 h-2 rounded-full" style="width: ${task.progress}"></div>
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                        ${task.company ? `<div class="text-xs text-gray-500">工程：${task.company}</div>` : ''}
+                                        ${task.note ? `<div class="mt-2 p-2 bg-white rounded text-xs text-gray-600 border border-gray-200">💡 ${task.note}</div>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    html += '</div></div>';
+                });
+                
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            
+            if (filtered.length === 0) {
+                html = '<div class="bg-white rounded-lg shadow-sm p-12 text-center"><p class="text-gray-500 text-lg">沒有符合篩選條件的工作事項</p></div>';
+            }
+            
+            document.getElementById('calendar-container').innerHTML = html;
+        }
+
+        // Initialize
+        initFilters();
+        renderCalendar();
+    </script>
+</body>
+</html>
